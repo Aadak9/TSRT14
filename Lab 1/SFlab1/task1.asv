@@ -1,0 +1,27 @@
+function [bias, std_dev, variance] = task1(tphat)
+
+    v = 343; % speed of sound
+    rhat = tphat %* v;
+
+
+    
+
+    figure;
+
+    for sensor = 1:8
+
+        e(:,sensor) = rhat(:,sensor) - mean(rhat, 2);
+        bias(sensor) = mean(e(:, sensor));
+        variance(sen)
+
+        bias(sensor) = mean(e);
+        std_dev(sensor) = std(e);
+        variance(sensor) = var(e);
+
+        subplot(2,4,sensor);
+        histfit(e,20);
+        title(['Sensor ', num2str(sensor)]);
+
+    end
+
+end
