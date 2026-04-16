@@ -1,4 +1,4 @@
-function [bias, std_dev, variance] = task1(tphat)
+
 
     v = 343; % speed of sound
     tphat = tphat(:, 7:end);
@@ -27,5 +27,6 @@ function [bias, std_dev, variance] = task1(tphat)
         title(['Sensor ', num2str(sensor)]);
 
     end
+    save('variance_data.mat', 'variance');
 
-end
+

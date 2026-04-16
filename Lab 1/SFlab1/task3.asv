@@ -1,26 +1,24 @@
 clc; clear; close all;
-load('variance_data.mat');
+
 %% Parameters
 M = 4;
 N = 1;
 nx = 2;
 
-%% Sensor configurations 
+%% Sensor configurations (4 microphones in 2D → 8 values)
 good_config = [1.915 2.423 -2.322 2.598 1.587 -2.754 -2.277 -2.613];
 bad_config  = [-3.479 1.193 -3.616 0.4 -3.651 -0.485 -3.58 -1.137];
 G = reshape(good_config, 2, []);
 B = reshape(bad_config, 2, []);
-target_start = [-9.310641288757324, 185.81527709960938];
+source = [0; 0];
 
 
 %% Grid for evaluation
 x_range = -5:0.1:5;
 y_range = -5:0.1:5;
 
-%% GOOD CONFIGURATION 
+%% ===================== GOOD CONFIGURATION =====================
 s1 = exsensor('tdoa1', M, N, nx);
-s1.th = good_config;
-s1.pe = diag(variance);
 
 % Sensor geometry
 
@@ -29,7 +27,7 @@ figure(1);
 crlb2(s1, [], x_range, y_range, [1 2], 'rmse');
 hold on;
 
-% Plot sensors
+% Plot sensors and source
 scatter(G(1,:), G(2,:), 80, 'k*', 'LineWidth', 1.5);
 plot(source(1), source(2), 'ro', 'MarkerSize', 10, 'LineWidth', 2);
 
@@ -40,7 +38,7 @@ title('CRLB RMSE - Good Configuration');
 colorbar;
 
 
-%% BAD CONFIGURATION 
+%% ===================== BAD CONFIGURATION =====================
 s2 = exsensor('tdoa1', M, N, nx);
 
 % Sensor geometry
@@ -48,7 +46,7 @@ s2.th = bad_config;
 
 figure(2);
 
-crlb2(s2, [], x_range, y_range, [1 2]);
+crlb2(s2, [], x_range, y_range, [1 2], 'rmse');
 hold on;
 
 % Plot sensors and source
@@ -63,7 +61,7 @@ colorbar;
 
 figure(3)
 
-[cx, X1, X2] = crlb2(s1, [], -5:0.1:5, -5:0.1:5);
+[cx, X1, X2] = crlb2(s1, [], -3:0.1:3, -3:0.1:3, [1 2], 'rmse');
 
 surf(X1, X2, cx);
 
@@ -74,7 +72,7 @@ title('3D CRLB RMSE - Good Configuration')
 
 figure(4)
 
-[cx, X1, X2] = crlb2(s2, [], -5:0.1:5, -5:0.1:5, [1 2], 'rmse');
+[cx, X1, X2] = crlb2(s2, [], -3:0.1:3, -3:0.1:3, [1 2], 'rmse');
 
 surf(X1, X2, cx);
 
@@ -83,8 +81,8 @@ ylabel('y (m)')
 zlabel('RMSE lower bound')
 title('3D CRLB RMSE - Bad Configuration')
 
-%nn = [2, 0, 3, 8];
-%s2 = sensormod(@task2, nn);
-%s2.th = good_config;
+nn = [2, 0, 3, 8];
+s2 = sensormod(@task2, nn);
+s2.th = good_config;
 
 %%Create covariance matrix, differences in output from sensormodel?

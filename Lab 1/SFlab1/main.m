@@ -15,3 +15,6 @@ disp('Standard deviation for each sensor:');
 disp(std_dev);
 disp('Variance for each sensor:');
 disp(variance);
+
+load('dataset_1_exp2.mat');
+
