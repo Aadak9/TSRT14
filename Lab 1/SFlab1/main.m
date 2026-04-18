@@ -2,7 +2,7 @@
 %% Task 1 Sensor calibration
 clc; clear; close all;
 
-
+%{
 load('dataset_1_calibration.mat');  
 
 
@@ -62,7 +62,6 @@ h_tdoa_sensorref = @(x, th) [
 ];%Page 90 eq 4.35 for calculating R for this setup
 
 %% Task 3 % 4(b) Sensor setup and configuration analysis
-%% Task 2
 clc; clear; close all;
 load('dataset_1_calibration.mat');
 load('variance_data.mat');
@@ -70,7 +69,6 @@ load('variance_data.mat');
 M = 4;
 N = 1;
 nx = 2;
-%mic_locations = reshape(mic_locations, 2, [])';
 good_config = mic_locations(1:8);
 bad_config = mic_locations(9:16);
 
@@ -117,11 +115,38 @@ crlb2(s2, [], -5:0.1:5, -5:0.1:5, [1 2], 'rmse');
 axis([0 1 0 1])
 [cx, X1, X2] = crlb2(s2, [], -5:0.1:5, -5:0.1:5, [1 2], 'rmse');
 surf(X1, X2, cx);
+%}
 
 %% Task 5 Localization
 %% Task 2
-%clc; clear; close all;
-%load('dataset_1_exp2.mat');
+%%clc; clear; close all;
+load('dataset_1_exp2.mat');
+
+v = 343; % speed of sound
+tphat = tphat(:, 8:end);
+rhat = tphat * v;
+
+
+good_config = mic_locations(1:8);
+h_tdoa_bias = inline('[sqrt((x(1,:)-th(1)).^2+(x(2,:)-th(2)).^2) + x(3,:) ; sqrt((x(1,:)-th(3)).^2+(x(2,:)-th(4)).^2)+ x(3,:) ; sqrt((x(1,:)-th(5)).^2+(x(2,:)-th(6)).^2)+ x(3,:) ; sqrt((x(1,:)-th(7)).^2+(x(2,:)-th(8)).^2)+ x(3,:)]', 't', 'x', 'u', 'th');
+y = sig(rhat(1:4,:)', 2);
+
+s1 = sensormod(h_tdoa_bias, [3 0 4 8]);
+s1.x0 = [position(1,1); position(1,2); min(rhat(1:4, 1))]; 
+s1.th = good_config;
+
+
+for time_pulses = 1:length(rhat) - 1
+    x_hat = estimate(s1, y(time_pulses,:), 'thmask', zeros(8,1));
+    x_hat_vector(:,time_pulses) = x_hat.x0(1:2);
+    s1.x0 = [x_hat.x0(1:2); min(rhat(1:4, time_pulses + 1))];
+end
+
+figure;
+plot(x_hat_vector(1,:), x_hat_vector(2,:), 'o');
+%plot(position(:,1), position(:,2));
+hold on;
+plot(s1);
 
 
 
