@@ -117,9 +117,9 @@ axis([0 1 0 1])
 surf(X1, X2, cx);
 %}
 
-%% Task 5 Localization
-%% Task 2
+%% Task 5 (b) Localization
 %%clc; clear; close all;
+%{
 load('dataset_1_exp2.mat');
 
 v = 343; % speed of sound
@@ -144,10 +144,49 @@ end
 
 figure;
 plot(x_hat_vector(1,:), x_hat_vector(2,:), 'o');
-%plot(position(:,1), position(:,2));
 hold on;
 plot(s1);
+%}
 
+%% Task 5 (d) Localization
+%%clc; clear; close all;
+load('dataset_1_exp2.mat');
+
+v = 343; % speed of sound
+tphat = tphat(:, 8:end);
+rhat = tphat * v;
+
+ 
+good_config = mic_locations(1:8);
+h_tdoa_reference = inline('[sqrt((x(1,:)-th(1)).^2+(x(2,:)-th(2)).^2) - sqrt((x(1,:)-th(3)).^2+(x(2,:)-th(4)).^2) ; sqrt((x(1,:)-th(1)).^2+(x(2,:)-th(2)).^2) - sqrt((x(1,:)-th(5)).^2+(x(2,:)-th(6)).^2) ; sqrt((x(1,:)-th(1)).^2+(x(2,:)-th(2)).^2) - sqrt((x(1,:)-th(7)).^2+(x(2,:)-th(8)).^2)]', 't', 'x', 'u', 'th');
+
+rhat_sensor_diff = zeros(3, length(rhat));
+
+for i = 1:length(rhat) - 1
+    rhat_sensor_diff(1, i) = rhat(1, i) - rhat(2, i);
+    rhat_sensor_diff(2, i) = rhat(1, i) - rhat(3, i);
+    rhat_sensor_diff(3, i) = rhat(1, i) - rhat(4, i);
+
+end
+target_start_pos = [position(1,2), position(1,3), position(1,1)];
+y = sig(rhat_sensor_diff', 2);
+s2 = sensormod(h_tdoa_reference, [2 0 3 8]);
+s2.x0 = target_start_pos(1:2); 
+s2.th = good_config;
+%pe_1 = variance(1)*ones(3,3);
+%pe_1 = pe_1 + diag([variance(2), variance(3), variance(4)]);
+
+
+for time_pulses = 1:length(rhat) - 1
+    x_hat = estimate(s2, y(time_pulses,:), 'thmask', zeros(8,1));
+    x_hat_vector(:,time_pulses) = x_hat.x0;
+    s2.x0 = x_hat.x0;
+end
+
+figure;
+plot(x_hat_vector(1,:), x_hat_vector(2,:), 'o');
+hold on;
+plot(s2);
 
 
 
