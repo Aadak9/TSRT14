@@ -175,7 +175,7 @@ for i = 1:length(rhat)
 
 end
 
-rhat_sensor_diff(:, 150) = [];
+
 y = sig(rhat_sensor_diff', 2);
 position = position/100;
 
@@ -205,7 +205,6 @@ plot(s2);
 %}
 
 %% Task 6 (a)
-%{
 x_hat_vector_fixed = x_hat_vector(1:2, 2:149);
 artificial_measurments = sig(x_hat_vector_fixed');
 m1 = exlti('cv2d');
@@ -218,11 +217,11 @@ figure;
 xplot2(model1_tracked_m1_a, artificial_measurments.y, 'conf', 90);
 figure;
 xplot2(model1_tracked_m2_a, artificial_measurments.y, 'conf', 90);
-%}
+
 
 %% Task 6 (b)
 
-m1 = exmotion('cv2d');
+m1 = exlti('cv2d');
 m2 = exmotion('ctcv2d');
 estimation_model = s2;
 
