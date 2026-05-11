@@ -61,7 +61,7 @@ h_tdoa_sensorref = @(x, th) [
     norm(x - th(1:2)) - norm(x - th(5:6));
     norm(x - th(1:2)) - norm(x - th(7:8))
 ];%Page 90 eq 4.35 for calculating R for this setup
-
+%
 %% Task 3 % 4(b) Sensor setup and configuration analysis
 clc; clear; close all;
 load('dataset_1_calibration.mat');
@@ -132,7 +132,7 @@ good_config = mic_locations(1:8);
 h_tdoa_bias = inline('[sqrt((x(1,:)-th(1)).^2+(x(2,:)-th(2)).^2) + x(3,:) ; sqrt((x(1,:)-th(3)).^2+(x(2,:)-th(4)).^2)+ x(3,:) ; sqrt((x(1,:)-th(5)).^2+(x(2,:)-th(6)).^2)+ x(3,:) ; sqrt((x(1,:)-th(7)).^2+(x(2,:)-th(8)).^2)+ x(3,:)]', 't', 'x', 'u', 'th');
 y = sig(rhat(1:4,:)', 2);
 
-position = position/100; %??
+position = position/1000; %??
 s1 = sensormod(h_tdoa_bias, [3 0 4 8]);
 s1.x0 = [position(1,2); position(1,3); min(rhat(1:4, 1))]; 
 s1_x0_tmp = s1.x0;
@@ -149,13 +149,14 @@ figure;
 plot(x_hat_vector(1,:), x_hat_vector(2,:), '.', 'Color', 'r');
 hold on;
 plot(s1);
-
+hold on;
+plot(position(1:end,2), position(1:end,3), 'x', 'Color', 'b');
 %}
 
 %
 %% Task 5 (d) Localization
 %%clc; clear; close all;
-
+%
 %
 load('dataset_1_exp2.mat');
 
@@ -175,9 +176,9 @@ for i = 1:length(rhat)
 
 end
 
-rhat_sensor_diff(:, 150) = [];
+rhat_sensor_diff(:, [1 150]) = [];
 y = sig(rhat_sensor_diff', 2);
-position = position/100;
+position = position/1000;
 
 s2 = sensormod(h_tdoa_reference, [2 0 3 8]);
 s2.x0 = [position(1,2); position(1,3)];
@@ -188,9 +189,9 @@ pe_2 = pe_2 + diag([variance(2), variance(3), variance(4)]);
 s2.pe = pe_2;
 
 
-x_hat_vector = zeros(2, length(rhat)); 
+x_hat_vector = zeros(2, length(rhat_sensor_diff)); 
 %
-for time_pulses = 1:length(rhat) - 1
+for time_pulses = 1:length(rhat_sensor_diff) - 1
     x_hat = estimate(s2, y(time_pulses ,:), 'thmask', zeros(8,1));
     x_hat_vector(:, time_pulses) = x_hat.x0;
     s2_x0_temp = x_hat.x0;
@@ -202,6 +203,8 @@ figure;
 plot(x_hat_vector(1,2:end), x_hat_vector(2,2:end), '.', 'Color', 'r');
 hold on;
 plot(s2);
+hold on;
+plot(position(1:end,2), position(1:end,3), 'x', 'Color', 'b');
 %}
 
 %% Task 6 (a)
@@ -221,13 +224,14 @@ xplot2(model1_tracked_m2_a, artificial_measurments.y, 'conf', 90);
 %}
 
 %% Task 6 (b)
-
+%{
 m1 = exmotion('cv2d');
 m2 = exmotion('ctcv2d');
 estimation_model = s2;
 
 model1 = addsensor(m1, s2);
 model2 = addsensor(m2, s2);
+modell1.x0 = [0 ; 0 ; 0 ; 0 ; 0];
 model2.x0 = [0 ; 0 ; 0 ; 0 ; 0];
 
 model1_tracked = ekf(model1, y);
@@ -239,4 +243,28 @@ figure;
 xplot2(model2_tracked, y.y, 'conf', 90)
 %}
 
+%% Task 7
+%
+m1_7 = exmotion('cv2d');
+estimation_model_7 = s2;
+randvar = 0.1*randn(8,1);
+%estimation_model_7.th = estimation_model_7.th + randvar;
+offset = [0.5; -0.5; 0.01; 0.01; 0.01; -0.01; 0.01; -0.01];
+estimation_model_7.th = estimation_model_7.th + offset;
 
+model_7 = addsensor(m1_7, estimation_model_7);
+model_tracked_7 = ekf(model_7, y);
+
+figure;
+xplot2(model_tracked_7, y.y, 'conf', 90)
+%axis([-5 5 -5 5]);
+title("50 centimeter disturbed");
+
+figure;
+plot(s2);
+hold on;
+plot(model_7.th(1), model_7.th(2), 'd')
+plot(model_7.th(3), model_7.th(4), 'd')
+plot(model_7.th(5), model_7.th(6), 'd')
+plot(model_7.th(7), model_7.th(8), 'd')
+%}
