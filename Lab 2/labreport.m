@@ -45,8 +45,107 @@ if ~inpublish  % Don't recollect data during publish
   save DATAFILE -append xhat2 meas2
 end
 %%
+[xhat, meas] = filterTemplate("data/calibration.txt")
 
-% _Put your code to visualize the data here_
+acc = meas.acc;
+gyr = meas.gyr;
+mag = meas.mag;
+t = meas.t;
+
+start_cut=520;
+end_cut=100;
+
+acc = acc(1:3, start_cut:end-end_cut);
+mag = mag(1:3, start_cut:end-end_cut);
+gyr = gyr(1:3, start_cut:end-end_cut);
+t = t(1,start_cut:end-end_cut);
+
+% Accleration
+acc_mean = mean(acc(:, ~any(isnan(acc), 1)), 2)
+acc_cov = cov(acc(:, ~any(isnan(acc), 1))')
+
+figure(1);
+subplot(3,2,1);
+histfit(acc(1,:), 20);
+title('Acc X');
+
+subplot(3,2,3);
+histfit(acc(2,:), 20);
+title('Acc Y');
+
+subplot(3,2,5);
+histfit(acc(3,:), 20);
+title('Acc Z');
+
+subplot(3,2,2);
+plot(t, acc(1,:));
+title('Acc X - Time');
+
+subplot(3,2,4);
+plot(t, acc(2,:));
+title('Acc Y - Time');
+
+subplot(3,2,6);
+plot(t, acc(3,:));
+title('Acc Z - Time');
+
+% Magnetometer
+mag_mean = mean(mag(:, ~any(isnan(mag), 1)), 2)
+mag_cov = cov(mag(:, ~any(isnan(mag), 1))')
+
+figure(2);
+subplot(3,2,1);
+histfit(mag(1,:), 20);
+title('Mag X');
+
+subplot(3,2,3);
+histfit(mag(2,:), 20);
+title('Mag Y');
+
+subplot(3,2,5);
+histfit(mag(3,:), 20);
+title('Mag Z');
+
+subplot(3,2,2);
+plot(t, mag(1,:));
+title('Mag X - Time');
+
+subplot(3,2,4);
+plot(t, mag(2,:));
+title('Mag Y - Time');
+
+subplot(3,2,6);
+plot(t, mag(3,:));
+title('Mag Z - Time');
+
+% Gyroscope
+gyr_mean = mean(gyr(:, ~any(isnan(gyr), 1)), 2)
+gyr_cov = cov(gyr(:, ~any(isnan(gyr), 1))')
+
+figure(3);
+subplot(3,2,1);
+histfit(gyr(1,:), 20);
+title('Gyr X');
+
+subplot(3,2,3);
+histfit(gyr(2,:), 20);
+title('Gyr Y');
+
+subplot(3,2,5);
+histfit(gyr(3,:), 20);
+title('Gyr Z');
+
+subplot(3,2,2);
+plot(t, gyr(1,:));
+title('Gyr X - Time');
+
+subplot(3,2,4);
+plot(t, gyr(2,:));
+title('Gyr Y - Time');
+
+subplot(3,2,6);
+plot(t, gyr(3,:));
+title('Gyr Z - Time');
 
 %%
 % *Result*
@@ -56,6 +155,48 @@ end
 % to deal with these._
 % * _The determined average acceleration vector, angular velocity vector,
 % and magnetic field, and their respective covariance matrices._
+%
+% acc_mean =
+% 
+%     0.2491
+%    -0.2820
+%     8.9914
+% 
+% acc_cov =
+% 
+%    1.0e-03 *
+% 
+%     0.3428    0.0055   -0.0116
+%     0.0055    0.2618    0.0036
+%    -0.0116    0.0036    0.7062
+% 
+% mag_mean =
+% 
+%    -7.3477
+%    15.1101
+%   -38.4385
+% 
+% mag_cov =
+% 
+%     0.5096   -0.0013   -0.0036
+%    -0.0013    0.4177   -0.0172
+%    -0.0036   -0.0172    0.4707
+% 
+% gyr_mean =
+% 
+%    1.0e-03 *
+% 
+%     0.2577
+%    -0.4331
+%    -0.3889
+% 
+% gyr_cov =
+% 
+%    1.0e-06 *
+% 
+%     0.6142    0.0100   -0.0321
+%     0.0100    0.6279    0.0519
+%    -0.0321    0.0519    0.6424
 
 %% 3. Add the EKF time update step
 % _*Include your time update function* from the
@@ -74,7 +215,7 @@ end
 %
 % _Run the indicated code below to generate results to plot._
 if ~inpublish  % Don't recollect data during publish
-  [xhat3, meas3] = ekfFilter();
+  [xhat3, meas3] = ekfFilter("data/calibration.txt");
   save DATAFILE -append xhat3 meas3
 end
 %%
