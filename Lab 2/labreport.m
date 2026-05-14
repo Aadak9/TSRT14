@@ -45,7 +45,7 @@ if ~inpublish  % Don't recollect data during publish
   save DATAFILE -append xhat2 meas2
 end
 %%
-[xhat, meas] = filterTemplate("data/calibration.txt")
+[xhat, meas] = filterTemplate();
 
 acc = meas.acc;
 gyr = meas.gyr;
@@ -88,6 +88,7 @@ title('Acc Y - Time');
 subplot(3,2,6);
 plot(t, acc(3,:));
 title('Acc Z - Time');
+pause;
 
 % Magnetometer
 mag_mean = mean(mag(:, ~any(isnan(mag), 1)), 2)
@@ -117,6 +118,7 @@ title('Mag Y - Time');
 subplot(3,2,6);
 plot(t, mag(3,:));
 title('Mag Z - Time');
+pause;
 
 % Gyroscope
 gyr_mean = mean(gyr(:, ~any(isnan(gyr), 1)), 2)
@@ -146,6 +148,11 @@ title('Gyr Y - Time');
 subplot(3,2,6);
 plot(t, gyr(3,:));
 title('Gyr Z - Time');
+
+% Create structs
+calAcc = struct('m', acc_mean, 'R', acc_cov);
+calMag = struct('m', mag_mean, 'R', mag_cov);
+calGyr = struct('m', gyr_mean, 'R', gyr_cov);
 
 %%
 % *Result*
@@ -215,7 +222,7 @@ title('Gyr Z - Time');
 %
 % _Run the indicated code below to generate results to plot._
 if ~inpublish  % Don't recollect data during publish
-  [xhat3, meas3] = ekfFilter("data/calibration.txt");
+  [xhat3, meas3] = ekfFilter('', calAcc, calMag, calGyr);
   save DATAFILE -append xhat3 meas3
 end
 %%
@@ -227,6 +234,14 @@ visDiff(xhat3, meas3);
 % * _What has gyroscope measurements added?_
 % * _What is the difference between starting the program with the phone flat
 %   on the desk and in a random pose?  Why?_
+%
+% That the phone orientation updates because of the gyroscope based
+% motion model. Becomes less accurate when shaking the phone. Assumes
+% the phone lays down flat in calibration position when starting.
+%
+% When starting flat, like in the calibration, the pose is correctly
+% predicted, but drifts over time. If it starts in another pose it will
+% be wrong from the start.
 
 %% 4. Add the EKF accelerometer measurement update step
 % _*Include your accelerometer measurement update function* from the
@@ -242,7 +257,7 @@ visDiff(xhat3, meas3);
 %
 % _Run the indicated code below to generate results to plot._
 if ~inpublish  % Don't recollect data during publish
-  [xhat4, meas4] = ekfFilter();
+  [xhat4, meas4] = ekfFilter('', calAcc, calMag, calGyr);
   save DATAFILE -append xhat4 meas4
 end
 %%
@@ -255,6 +270,12 @@ visDiff(xhat4, meas4);
 % * _What happens when you shake or quickly slide the phone on a surface?
 %   Why?_
 %
+% Better orientation correction since it knows where the gravity vector
+% is pointing (g). 
+% When sliding on table, a force component is generated horizontally which
+% creates an artificial gravity which will make the phone tip a bit,
+% which will disappear when the phone is still again. Therefore starts
+% to wobble a lot but then resets when still.
 
 %% 5. Add accelerometer outlier rejection
 % _*Describe your accelerometer outlier rejection:*_
@@ -262,18 +283,30 @@ visDiff(xhat4, meas4);
 % * _What is considered an outlier?_
 % * _What do you do when you encounter an outlier?_
 %
+% We check the length of the resulting acceleration vector. When having
+% "artificial gravity", the length will increase since we introduce
+% values in other directions. We therefore check if the length
+% is withing reasonable bounds near the gravity constant.
 %%
 % _*How did you implement the outlier rejection?*_
 %%
+% When encountering an outlier, we simply do not
+% perform the measurement update step, and insted set the visualization
+% flag to 0 to indicate a disturbance and outlier.
 %
-%   % _Write code to clarify here._
+% if accValue < 10 && accValue > 9.7
+%   [x, P] = mu_g(x, P, acc, calAcc.R, calAcc.m);
+%   ownView.setAccDist(1);
+% else
+%   ownView.setAccDist(0);
+% end
 %
 %%
 % *Result*
 %
 % _Run the indicated code below to generate results to plot._
 if ~inpublish  % Don't recollect data during publish
-  [xhat5, meas5] = ekfFilter();
+  [xhat5, meas5] = ekfFilter('', calAcc, calMag, calGyr);
   save DATAFILE -append xhat5 meas5
 end
 %%
@@ -300,7 +333,7 @@ visDiff(xhat5, meas5);
 %
 % _Run the indicated code below to generate results to plot._
 if ~inpublish  % Don't recollect data during publish
-  [xhat6, meas6] = ekfFilter();
+  [xhat6, meas6] = ekfFilter('', calAcc, calMag, calGyr);
   save DATAFILE -append xhat6 meas6
 end
 %%

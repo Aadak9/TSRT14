@@ -1,7 +1,9 @@
 function [x_new, P_new]=mu_m(x, P, ymag, Rm, m0)
     % Calculate h(x) and h'(x)
-    h_x = Qq(x)*m0;
-    h_dx = dQqdq(x)*m0;
+    [q0, q1, q2, q3] = dQqdq(x);
+
+    h_x = Qq(x)'*m0;
+    h_dx = [q0'*m0, q1'*m0, q2'*m0, q3'*m0];
     
     % Use EKF1 measurement update equations
     S = Rm + h_dx*P*h_dx';

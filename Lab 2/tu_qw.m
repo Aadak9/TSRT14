@@ -9,8 +9,12 @@ function [x_new, P_new]=tu_qw(x, P, omega, T, Rw)
   else
     % Use EKF1 time update equations
     fx = 1/2 * Somega(omega)*x;
-    x_new = x + fx*T;
-    P_new = Qk + fx*P*fx';
+    
+    I = eye(length(x));
+    F = (I + fx*T);
+
+    x_new = F*x;
+    P_new = Qk + F*P*F';
   end
 
   % Normalize to keep unit vector to one
