@@ -364,24 +364,12 @@ visDiff(xhat6, meas6);
 % that the norm of the magnetometer should be close the norm of the
 % magnetic field measured during calibration. This should work since
 % the magnetic field strength should not depend on orientation.
-% In this way, we can somewhat detect if disturbances are present and then
-% not perform the measurement update.
+% In this way, we can somewhat detect if 
 %%
 % _*How did you implement the outlier rejection?*_
 %%
 %
-% m0 = [0 sqrt(calMag.m(1)^2 + calMag.m(2)^2) calMag.m(3)]';
-% m0Norm = norm(m0);
-% 
-% magNorm = norm(mag);
-% magDev = abs(magNorm - m0Norm);
-% 
-% if magDev < 0.20 * m0Norm
-%     [x, P] = mu_m(x, P, mag, calMag.R, m0);
-%     ownView.setMagDist(1);
-% else
-%     ownView.setMagDist(0);
-% end
+%   % _Write code to clarify here._
 %
 %%
 % *Result*
