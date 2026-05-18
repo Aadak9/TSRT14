@@ -132,7 +132,6 @@ function [xhat, meas] = ekfFilter(fname, calAcc, calMag, calGyr)
 
     mag = data(1, 8:10)';
     if ~any(isnan(mag)) && true % Mag measurements are available.
-     calMag.m
       m0 = [0 sqrt(calMag.m(1)^2 + calMag.m(2)^2) calMag.m(3)]';
       m0Norm = norm(m0);
 

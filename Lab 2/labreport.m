@@ -65,6 +65,10 @@ t = t(1,start_cut:end-end_cut);
 acc_mean = mean(acc(:, ~any(isnan(acc), 1)), 2)
 acc_cov = cov(acc(:, ~any(isnan(acc), 1))')
 
+% acc_mean(1) = 0;
+% acc_mean(2) = 0;
+% acc_mean
+
 figure(1);
 subplot(3,2,1);
 histfit(acc(1,:), 20);
@@ -419,6 +423,7 @@ if ~inpublish  % Don't recollect data during publish
   [xhat8, meas8] = ekfFilter('', calAcc, calMag, calGyr);
   save DATAFILE -append xhat8 meas8
 end
+%% 
 figure
 visDiff(xhat8, meas8);
 %%
