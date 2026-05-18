@@ -1,4 +1,4 @@
-function [xhat, meas] = ekfFilter(fname, calAcc, calMag, calGyr)
+function [xhat, meas] = ekfFilter(fname, calAcc, calMag, calMag)
 % FILTERTEMPLATE  Filter template
 %
 % This is a template function for how to collect and filter data
@@ -136,8 +136,14 @@ function [xhat, meas] = ekfFilter(fname, calAcc, calMag, calGyr)
       m0 = [0 sqrt(calMag.m(1)^2 + calMag.m(2)^2) calMag.m(3)]';
       m0Norm = norm(m0);
 
-      magNorm = norm(mag)
+      m0
+      mag
+
+      magNorm = norm(mag);
+      magDev = abs(magNorm - m0Norm);
+
       m0Norm
+      magNorm
 
       if magNorm > 35 && magNorm < 70
         [x, P] = mu_m(x, P, mag, calMag.R, m0);

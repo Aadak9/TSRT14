@@ -47,6 +47,7 @@ end
 %%
 [xhat, meas] = filterTemplate();
 
+%% 
 acc = meas.acc;
 gyr = meas.gyr;
 mag = meas.mag;
@@ -94,6 +95,7 @@ pause;
 mag_mean = mean(mag(:, ~any(isnan(mag), 1)), 2)
 mag_cov = cov(mag(:, ~any(isnan(mag), 1))')
 
+close();
 figure(2);
 subplot(3,2,1);
 histfit(mag(1,:), 20);
@@ -124,6 +126,7 @@ pause;
 gyr_mean = mean(gyr(:, ~any(isnan(gyr), 1)), 2)
 gyr_cov = cov(gyr(:, ~any(isnan(gyr), 1))')
 
+close();
 figure(3);
 subplot(3,2,1);
 histfit(gyr(1,:), 20);
@@ -149,10 +152,13 @@ subplot(3,2,6);
 plot(t, gyr(3,:));
 title('Gyr Z - Time');
 
+pause;
+close();
+
 % Create structs
-calAcc = struct('m', acc_mean, 'R', acc_cov);
-calMag = struct('m', mag_mean, 'R', mag_cov);
-calGyr = struct('m', gyr_mean, 'R', gyr_cov);
+calAcc = struct('m', acc_mean, 'R', acc_cov)
+calMag = struct('m', mag_mean, 'R', mag_cov)
+calGyr = struct('m', gyr_mean, 'R', gyr_cov)
 
 %%
 % *Result*
@@ -390,7 +396,7 @@ visDiff(xhat6, meas6);
 % resulting matrices in a mat-file, just in case you have to restart matlab
 % before compiling the report._
 if ~inpublish  % Don't recollect data during publish
-  [xhat7, meas7] = ekfFilter();
+  [xhat7, meas7] = ekfFilter('', calAcc, calMag, calGyr);
   save DATAFILE -append xhat7 meas7
 end
 %%
@@ -410,7 +416,7 @@ visDiff(xhat7, meas7);
 %
 % _Run the indicated code below to generate results to plot._
 if ~inpublish  % Don't recollect data during publish
-  [xhat8, meas8] = ekfFilter();
+  [xhat8, meas8] = ekfFilter('', calAcc, calMag, calGyr);
   save DATAFILE -append xhat8 meas8
 end
 figure

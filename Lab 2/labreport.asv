@@ -47,6 +47,7 @@ end
 %%
 [xhat, meas] = filterTemplate();
 
+%% 
 acc = meas.acc;
 gyr = meas.gyr;
 mag = meas.mag;
@@ -63,6 +64,8 @@ t = t(1,start_cut:end-end_cut);
 % Accleration
 acc_mean = mean(acc(:, ~any(isnan(acc), 1)), 2)
 acc_cov = cov(acc(:, ~any(isnan(acc), 1))')
+
+acc_mean(0)
 
 figure(1);
 subplot(3,2,1);
@@ -364,12 +367,24 @@ visDiff(xhat6, meas6);
 % that the norm of the magnetometer should be close the norm of the
 % magnetic field measured during calibration. This should work since
 % the magnetic field strength should not depend on orientation.
-% In this way, we can somewhat detect if 
+% In this way, we can somewhat detect if disturbances are present and then
+% not perform the measurement update.
 %%
 % _*How did you implement the outlier rejection?*_
 %%
 %
-%   % _Write code to clarify here._
+% m0 = [0 sqrt(calMag.m(1)^2 + calMag.m(2)^2) calMag.m(3)]';
+% m0Norm = norm(m0);
+% 
+% magNorm = norm(mag);
+% magDev = abs(magNorm - m0Norm);
+% 
+% if magDev < 0.20 * m0Norm
+%     [x, P] = mu_m(x, P, mag, calMag.R, m0);
+%     ownView.setMagDist(1);
+% else
+%     ownView.setMagDist(0);
+% end
 %
 %%
 % *Result*
@@ -378,7 +393,7 @@ visDiff(xhat6, meas6);
 % resulting matrices in a mat-file, just in case you have to restart matlab
 % before compiling the report._
 if ~inpublish  % Don't recollect data during publish
-  [xhat7, meas7] = ekfFilter();
+  [xhat7, meas7] = ekfFilter('', calAcc, calMag, calGyr);
   save DATAFILE -append xhat7 meas7
 end
 %%
@@ -398,7 +413,7 @@ visDiff(xhat7, meas7);
 %
 % _Run the indicated code below to generate results to plot._
 if ~inpublish  % Don't recollect data during publish
-  [xhat8, meas8] = ekfFilter();
+  [xhat8, meas8] = ekfFilter('', calAcc, calMag, calGyr);
   save DATAFILE -append xhat8 meas8
 end
 figure
