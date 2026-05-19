@@ -41,17 +41,14 @@ end
 % *Shortly describe your observations?*
 
 if ~inpublish  % Don't recollect data during publish
-  [xhat2, meas2] = ekfFilter();
+  [xhat2, meas2] = filterTemplate();
   save DATAFILE -append xhat2 meas2
 end
 %%
-[xhat, meas] = filterTemplate();
-
-%% 
-acc = meas.acc;
-gyr = meas.gyr;
-mag = meas.mag;
-t = meas.t;
+acc = meas2.acc;
+gyr = meas2.gyr;
+mag = meas2.mag;
+t = meas2.t;
 
 start_cut=520;
 end_cut=100;
@@ -65,7 +62,9 @@ t = t(1,start_cut:end-end_cut);
 acc_mean = mean(acc(:, ~any(isnan(acc), 1)), 2)
 acc_cov = cov(acc(:, ~any(isnan(acc), 1))')
 
-acc_mean(0)
+% acc_mean(1) = 0;
+% acc_mean(2) = 0;
+% acc_mean
 
 figure(1);
 subplot(3,2,1);
@@ -97,6 +96,7 @@ pause;
 mag_mean = mean(mag(:, ~any(isnan(mag), 1)), 2)
 mag_cov = cov(mag(:, ~any(isnan(mag), 1))')
 
+close();
 figure(2);
 subplot(3,2,1);
 histfit(mag(1,:), 20);
@@ -127,6 +127,7 @@ pause;
 gyr_mean = mean(gyr(:, ~any(isnan(gyr), 1)), 2)
 gyr_cov = cov(gyr(:, ~any(isnan(gyr), 1))')
 
+close();
 figure(3);
 subplot(3,2,1);
 histfit(gyr(1,:), 20);
@@ -152,10 +153,13 @@ subplot(3,2,6);
 plot(t, gyr(3,:));
 title('Gyr Z - Time');
 
+pause;
+close();
+
 % Create structs
-calAcc = struct('m', acc_mean, 'R', acc_cov);
-calMag = struct('m', mag_mean, 'R', mag_cov);
-calGyr = struct('m', gyr_mean, 'R', gyr_cov);
+calAcc = struct('m', acc_mean, 'R', acc_cov)
+calMag = struct('m', mag_mean, 'R', mag_cov)
+calGyr = struct('m', gyr_mean, 'R', gyr_cov)
 
 %%
 % *Result*
@@ -219,7 +223,7 @@ calGyr = struct('m', gyr_mean, 'R', gyr_cov);
 %
 %%
 % _*Motivate parameter choices:*_
-% We want to use the measured gyro bias and covariance in
+% We want to use the measured gyro covariance in
 % the motion model
 %%
 % *Result*
@@ -323,6 +327,8 @@ visDiff(xhat5, meas5);
 %
 % * _What happens when you shake or quickly slide the phone on surface?
 %   Why?_
+%
+% It 
 
 %% 6. Add the EKF magnetometer measurement update step
 % _*Include your magnetometer measurement update function* from the
@@ -416,6 +422,7 @@ if ~inpublish  % Don't recollect data during publish
   [xhat8, meas8] = ekfFilter('', calAcc, calMag, calGyr);
   save DATAFILE -append xhat8 meas8
 end
+%% 
 figure
 visDiff(xhat8, meas8);
 %%
@@ -425,6 +432,8 @@ visDiff(xhat8, meas8);
 % * _Some phones has no gyroscope, to reduce the production cost and
 %   preserve battery.  How does that affect their ability to estimate
 %   orientation?_
+%
+% It can orient itself, but it is very slow and not reactive.
 
 %% 9. If you are interested and have time
 % _No need to report back if you did this, but feel free if you did._

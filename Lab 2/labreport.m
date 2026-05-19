@@ -41,17 +41,14 @@ end
 % *Shortly describe your observations?*
 
 if ~inpublish  % Don't recollect data during publish
-  [xhat2, meas2] = ekfFilter();
+  [xhat2, meas2] = filterTemplate();
   save DATAFILE -append xhat2 meas2
 end
 %%
-[xhat, meas] = filterTemplate();
-
-%% 
-acc = meas.acc;
-gyr = meas.gyr;
-mag = meas.mag;
-t = meas.t;
+acc = meas2.acc;
+gyr = meas2.gyr;
+mag = meas2.mag;
+t = meas2.t;
 
 start_cut=520;
 end_cut=100;
@@ -226,7 +223,7 @@ calGyr = struct('m', gyr_mean, 'R', gyr_cov)
 %
 %%
 % _*Motivate parameter choices:*_
-% We want to use the measured gyro bias and covariance in
+% We want to use the measured gyro covariance in
 % the motion model
 %%
 % *Result*
@@ -330,6 +327,8 @@ visDiff(xhat5, meas5);
 %
 % * _What happens when you shake or quickly slide the phone on surface?
 %   Why?_
+%
+% It still wobbles a little, but not as much.
 
 %% 6. Add the EKF magnetometer measurement update step
 % _*Include your magnetometer measurement update function* from the
@@ -339,7 +338,8 @@ visDiff(xhat5, meas5);
 %
 %%
 % _*Motivate parameter choices:*_
-%
+% We want to use the covariance and bias from the calibration in the
+% measurement update.
 %
 %%
 % *Result*
@@ -410,6 +410,9 @@ visDiff(xhat7, meas7);
 % _*Shortly describe your observations:*_
 %
 % * _What happens when you put the phone close to a magnet?  Why?_
+%
+% The orientation starts to move in the horizontal plane. Does no longer
+% correspond to reality.
 
 %% 8. Test your filter without gyroscope measurements
 % _The easiest way to do this is to run your full filter implementation and
@@ -433,6 +436,8 @@ visDiff(xhat8, meas8);
 % * _Some phones has no gyroscope, to reduce the production cost and
 %   preserve battery.  How does that affect their ability to estimate
 %   orientation?_
+%
+% It can orient itself, but it is very slow and not reactive.
 
 %% 9. If you are interested and have time
 % _No need to report back if you did this, but feel free if you did._

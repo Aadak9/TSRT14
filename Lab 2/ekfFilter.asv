@@ -1,4 +1,4 @@
-function [xhat, meas] = ekfFilter(fname, calAcc, calMag, calMag)
+function [xhat, meas] = ekfFilter(fname, calAcc, calMag, calGyr)
 % FILTERTEMPLATE  Filter template
 %
 % This is a template function for how to collect and filter data
@@ -113,6 +113,16 @@ function [xhat, meas] = ekfFilter(fname, calAcc, calMag, calMag)
       t0 = t;
     end
 
+    persistent t_prev;
+
+    if isempty(t_prev)
+        dt = 0.01;
+    else
+        dt = t - t_prev;
+    end
+
+    dt = t - t_prev;
+
     gyr = data(1, 5:7)';
     if ~any(isnan(gyr)) && true % Gyro measurements are available. 
         [x, P] = tu_qw(x, P, gyr, 0.01, calGyr.R);
@@ -132,18 +142,10 @@ function [xhat, meas] = ekfFilter(fname, calAcc, calMag, calMag)
 
     mag = data(1, 8:10)';
     if ~any(isnan(mag)) && true % Mag measurements are available.
-     calMag.m
       m0 = [0 sqrt(calMag.m(1)^2 + calMag.m(2)^2) calMag.m(3)]';
+      
       m0Norm = norm(m0);
-
-      m0
-      mag
-
       magNorm = norm(mag);
-      magDev = abs(magNorm - m0Norm);
-
-      m0Norm
-      magNorm
 
       if magNorm > 35 && magNorm < 70
         [x, P] = mu_m(x, P, mag, calMag.R, m0);

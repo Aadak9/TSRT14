@@ -1,12 +1,10 @@
 function [x_new, P_new]=mu_m(x, P, ymag, Rm, m0)
     % Calculate h(x) and h'(x)
+    Q = Qq(x);
     [q0, q1, q2, q3] = dQqdq(x);
 
-    h_x = Qq(x)'*m0;
+    h_x = Q'*m0;
     h_dx = [q0'*m0, q1'*m0, q2'*m0, q3'*m0];
-
-    % Testa sandwicha med Qq
-    % Testa ändra brus matriser
     
     % Use EKF1 measurement update equations
     S = Rm + h_dx*P*h_dx';
@@ -21,3 +19,6 @@ function [x_new, P_new]=mu_m(x, P, ymag, Rm, m0)
     % Normalize
     [x_new, P_new] = mu_normalizeQ(x_new, P_new);
 end
+
+    % Testa sandwicha med Qq
+    % Testa ändra brus matriser
