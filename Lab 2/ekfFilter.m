@@ -54,7 +54,6 @@ function [xhat, meas] = ekfFilter(fname, calAcc, calMag, calGyr)
 
   m0 = [0 sqrt(calMag.m(1)^2 + calMag.m(2)^2) calMag.m(3)]';
   m0Norm = norm(m0);
-  g0Norm = norm(calAcc.m);
 
   % Current filter state.
   x = [1; 0; 0; 0];
@@ -127,14 +126,18 @@ function [xhat, meas] = ekfFilter(fname, calAcc, calMag, calGyr)
     t_prev = t;
 
     gyr = data(1, 5:7)';
-    if ~any(isnan(gyr)) && true % Gyro measurements are available. 
+    if ~any(isnan(gyr)) && true % Gyro measurements are available.
+        gyr = gyr - calGyr.m;
         [x, P] = tu_qw(x, P, gyr, dt, calGyr.R);
     end
 
     acc = data(1, 2:4)';
     if ~any(isnan(acc)) && true  % Acc measurements are available.
-      if abs(norm(acc) - g0Norm) < 0.7
-        [x, P] = mu_g(x, P, acc, calAcc.R, calAcc.m);
+      g_ref = [0; 0; 9.82];
+
+      if abs(norm(acc) - norm(g_ref)) < 0.7
+        acc = acc - calAcc.m;
+        [x, P] = mu_g(x, P, acc, calAcc.R, g_ref);
         ownView.setAccDist(0);
       else
         ownView.setAccDist(1);
@@ -143,7 +146,9 @@ function [xhat, meas] = ekfFilter(fname, calAcc, calMag, calGyr)
 
     mag = data(1, 8:10)';
     if ~any(isnan(mag)) && true % Mag measurements are available.
-      if abs(norm(mag) - m0Norm) < 70
+      magNorm = norm(mag);
+
+      if abs(magNorm / m0Norm - 1) < 0.7
         [x, P] = mu_m(x, P, mag, calMag.R, m0);
         ownView.setMagDist(0);
       else

@@ -59,8 +59,11 @@ gyr = gyr(1:3, start_cut:end-end_cut);
 t = t(1,start_cut:end-end_cut);
 
 % Accleration
-acc_mean = mean(acc(:, ~any(isnan(acc), 1)), 2)
+acc_mean = mean(acc(:, ~any(isnan(acc), 1)), 2);
 acc_cov = cov(acc(:, ~any(isnan(acc), 1))')
+
+gref = [0; 0; 9.82];
+acc_mean = acc_mean - gref
 
 % acc_mean(1) = 0;
 % acc_mean(2) = 0;
@@ -90,13 +93,11 @@ title('Acc Y - Time');
 subplot(3,2,6);
 plot(t, acc(3,:));
 title('Acc Z - Time');
-pause;
 
 % Magnetometer
 mag_mean = mean(mag(:, ~any(isnan(mag), 1)), 2)
 mag_cov = cov(mag(:, ~any(isnan(mag), 1))')
 
-close();
 figure(2);
 subplot(3,2,1);
 histfit(mag(1,:), 20);
@@ -121,13 +122,11 @@ title('Mag Y - Time');
 subplot(3,2,6);
 plot(t, mag(3,:));
 title('Mag Z - Time');
-pause;
 
 % Gyroscope
 gyr_mean = mean(gyr(:, ~any(isnan(gyr), 1)), 2)
 gyr_cov = cov(gyr(:, ~any(isnan(gyr), 1))')
 
-close();
 figure(3);
 subplot(3,2,1);
 histfit(gyr(1,:), 20);
@@ -152,9 +151,6 @@ title('Gyr Y - Time');
 subplot(3,2,6);
 plot(t, gyr(3,:));
 title('Gyr Z - Time');
-
-pause;
-close();
 
 % Create structs
 calAcc = struct('m', acc_mean, 'R', acc_cov)
